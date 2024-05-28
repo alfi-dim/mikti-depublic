@@ -1,11 +1,13 @@
 package main
 
 import (
+	"flag"
 	"github.com/joho/godotenv"
 	"github.com/labstack/echo/v4"
 	"log"
 	"mikti-depublic/app"
 	"mikti-depublic/common"
+	"mikti-depublic/db/seeds"
 	"net/http"
 )
 
@@ -15,6 +17,15 @@ func main() {
 		log.Fatal("Error loading .env file")
 	}
 	app.DBConnection()
+
+	seedFlag := flag.Bool("seed", false, "seed database")
+	flag.Parse()
+	if *seedFlag {
+		log.Println("Seeding database")
+		seeds.Run()
+		log.Println("Seeding database done")
+		return
+	}
 	e := echo.New()
 
 	// logger
