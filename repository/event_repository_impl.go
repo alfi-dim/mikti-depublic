@@ -47,6 +47,7 @@ func (repo *EventRepositoryImpl) GetListEvent() ([]domain.Event, error) {
 	return events, nil
 }
 
+// Update Event
 func (repo *EventRepositoryImpl) UpdateEvent(event domain.Event) (domain.Event, error) {
 	err := repo.db.Model(domain.Event{}).Where("id = ?", event.ID).Updates(event).Error
 
