@@ -1,29 +1,29 @@
 package main
 
 import (
-	"github.com/joho/godotenv"
-	"github.com/labstack/echo/v4"
-	"log"
 	"mikti-depublic/app"
-	"mikti-depublic/common"
-	"net/http"
+	"mikti-depublic/controller"
+	"mikti-depublic/repository"
+	"mikti-depublic/service"
+
+	"github.com/labstack/echo/v4"
 )
 
-func main() {
-	err := godotenv.Load()
-	if err != nil {
-		log.Fatal("Error loading .env file")
-	}
+func init() {
+	app.LoadEnv()
 	app.DBConnection()
+}
+
+func main() {
+	historyRepo := repository.NewHistoryRepositoryImpl(app.DB)
+	historyService := service.NewHistoryServiceImpl(historyRepo)
+	historyController := controller.NewHistoryControllerImpl(historyService)
+
 	e := echo.New()
 
-	// logger
-	common.NewLogger()
-	e.Use(common.LoggingMiddleware)
+	e.GET("/history", historyController.GetHistory)
+	e.GET("/history/:id", historyController.GetHistoryByID)
+	e.GET("/history/status/:status", historyController.GetHistoryByStatus)
 
-	e.GET("/", func(c echo.Context) error {
-		return c.String(http.StatusOK, "Hello, World!")
-	})
-
-	common.Logger.LogInfo().Msg(e.Start(":8080").Error())
+	e.Logger.Fatal(e.Start(":8080"))
 }

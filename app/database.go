@@ -2,20 +2,30 @@ package app
 
 import (
 	"log"
+	"mikti-depublic/model/domain"
 	"os"
 
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 )
 
-func DBConnection() *gorm.DB {
-	DB_POSTGRES_URL := os.Getenv("DB_POSTGRES_URL")
-	dsn := DB_POSTGRES_URL
-	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})
+var DB *gorm.DB
+
+func DBConnection() {
+	var err error
+	dsn := os.Getenv("DB_POSTGRES_URL")
+	DB, err = gorm.Open(postgres.Open(dsn), &gorm.Config{})
 
 	if err != nil {
-		log.Fatal(err.Error())
+		log.Fatal("Failed to connect to database")
 	}
 
-	return db
+	err = DB.AutoMigrate(&domain.User{}, &domain.Admin{}, &domain.Event{}, &domain.Transaction{})
+	if err != nil {
+		log.Fatalf("Failed to migrate the database schema: %v", err)
+	}
+}
+
+func GetDB() *gorm.DB {
+	return DB
 }
