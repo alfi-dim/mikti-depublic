@@ -8,6 +8,8 @@ import (
 	"gorm.io/gorm"
 )
 
+var Db *gorm.DB
+
 func DBConnection() *gorm.DB {
 	DB_POSTGRES_URL := os.Getenv("DB_POSTGRES_URL")
 	dsn := DB_POSTGRES_URL
@@ -17,5 +19,6 @@ func DBConnection() *gorm.DB {
 		log.Fatal(err.Error())
 	}
 
+	Db = db
 	return db
 }
