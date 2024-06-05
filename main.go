@@ -2,21 +2,39 @@ package main
 
 import (
 	"flag"
-	"github.com/joho/godotenv"
-	"github.com/labstack/echo/v4"
 	"log"
 	"mikti-depublic/app"
 	"mikti-depublic/common"
+	"mikti-depublic/controller"
 	"mikti-depublic/db/seeds"
+	"mikti-depublic/helper"
+	"mikti-depublic/repository"
+	"mikti-depublic/service"
 	"net/http"
+
+	"github.com/go-playground/validator"
+	"github.com/joho/godotenv"
+	"github.com/labstack/echo/v4"
 )
+
+type CustomeValidator struct {
+	validator *validator.Validate
+}
+
+func (cv *CustomeValidator) Validate(i interface{}) error {
+	return cv.validator.Struct(i)
+}
 
 func main() {
 	err := godotenv.Load()
 	if err != nil {
 		log.Fatal("Error loading .env file")
 	}
-	app.DBConnection()
+	db := app.DBConnection()
+	userRepo := repository.NewUserRepository(db)
+	tokenUseCase := helper.NewTokenUseCase()
+	userService := service.NewUserService(userRepo, tokenUseCase)
+	controller := controller.NewUserController(userService)
 
 	seedFlag := flag.Bool("seed", false, "seed database")
 	flag.Parse()
@@ -27,6 +45,11 @@ func main() {
 		return
 	}
 	e := echo.New()
+	e.Validator = &CustomeValidator{validator: validator.New()}
+	e.HTTPErrorHandler = helper.BindAndValidate
+
+	e.POST("/login-user", controller.LoginUser)
+	e.POST("/login-admin", controller.LoginAdmin)
 
 	// logger
 	common.NewLogger()
