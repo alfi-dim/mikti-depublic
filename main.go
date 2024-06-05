@@ -30,11 +30,6 @@ func (cv *CustomValidator) Validate(i interface{}) error {
 }
 
 func main() {
-	// err := godotenv.Load()
-	// if err != nil {
-	// 	log.Fatal("Error loading .env file")
-	// }
-	
 	db := app.GetDB()
 	// user
 	userRepo := repository.NewUserRepository(db)
