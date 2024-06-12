@@ -27,5 +27,5 @@ func (c *AdminController) Register(ctx echo.Context) error {
 		return ctx.JSON(http.StatusInternalServerError, map[string]string{"error": err.Error()})
 	}
 
-	return ctx.JSON(http.StatusOK, map[string]string{"Message": "Admin has successfully registered, can now log in."})
+	return ctx.JSON(http.StatusOK, map[string]string{"Message": "You have successfully registered as Admin, now you can log in."})
 }

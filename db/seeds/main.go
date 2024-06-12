@@ -6,7 +6,7 @@ import (
 )
 
 func Run() {
-	db := app.DBConnection()
+	db := app.GetDB()
 	gormOps := helper.NewGormOps(db)
 
 	SeedUsers(gormOps)

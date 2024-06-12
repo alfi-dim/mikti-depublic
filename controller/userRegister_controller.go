@@ -8,15 +8,15 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
-type UserController struct {
-	UserService *service.UserService
+type UserRegisterController struct {
+	UserService *service.UserRegisterService
 }
 
-func NewUserController(service *service.UserService) *UserController {
-	return &UserController{UserService: service}
+func NewUserRegisterController(service *service.UserRegisterService) *UserRegisterController {
+	return &UserRegisterController{UserService: service}
 }
 
-func (c *UserController) Register(ctx echo.Context) error {
+func (c *UserRegisterController) Register(ctx echo.Context) error {
 	var user domain.User
 	if err := ctx.Bind(&user); err != nil {
 		return ctx.JSON(http.StatusBadRequest, map[string]string{"error": err.Error()})
@@ -27,5 +27,5 @@ func (c *UserController) Register(ctx echo.Context) error {
 		return ctx.JSON(http.StatusInternalServerError, map[string]string{"error": err.Error()})
 	}
 
-	return ctx.JSON(http.StatusOK, map[string]string{"Message": "User has successfully registered, can now log in."})
+	return ctx.JSON(http.StatusOK, map[string]string{"Message": "You have successfully registered as User, now you can log in."})
 }

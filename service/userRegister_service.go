@@ -7,15 +7,15 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
-type UserService struct {
-	Repo *repository.UserRepository
+type UserRegisterService struct {
+	Repo *repository.UserRegisterRepository
 }
 
-func NewUserService(repo *repository.UserRepository) *UserService {
-	return &UserService{Repo: repo}
+func NewUserRegisterService(repo *repository.UserRegisterRepository) *UserRegisterService {
+	return &UserRegisterService{Repo: repo}
 }
 
-func (s *UserService) Register(user domain.User) error {
+func (s *UserRegisterService) Register(user domain.User) error {
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(user.Password), bcrypt.DefaultCost)
 	if err != nil {
 		return err

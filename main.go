@@ -4,27 +4,57 @@ import (
 	"flag"
 	"log"
 	"mikti-depublic/app"
-	"mikti-depublic/common"
 	"mikti-depublic/controller"
 	"mikti-depublic/db/seeds"
+	"mikti-depublic/helper"
 	"mikti-depublic/repository"
 	"mikti-depublic/service"
 	"net/http"
 
-	"github.com/joho/godotenv"
+	"github.com/go-playground/validator/v10"
+	_ "github.com/joho/godotenv"
 	"github.com/labstack/echo/v4"
-	"github.com/labstack/echo/v4/middleware"
 )
 
-func main() {
-	// Load environment variables from .env file
-	err := godotenv.Load()
-	if err != nil {
-		log.Fatal("Error loading .env file")
-	}
+func init() {
+	app.LoadEnv()
+	app.DBConnection()
+}
 
-	// Initialize database connection
-	db := app.DBConnection()
+type CustomValidator struct {
+	validator *validator.Validate
+}
+
+func (cv *CustomValidator) Validate(i interface{}) error {
+	return cv.validator.Struct(i)
+}
+
+func main() {
+	db := app.GetDB()
+	// user register
+	userRegisterRepo := repository.NewUserRegisterRepository(db)
+	userRegisterService := service.NewUserRegisterService(userRegisterRepo)
+	userRegisterController := controller.NewUserRegisterController(userRegisterService)
+	
+	// admin register
+	adminRepo := repository.NewAdminRepository(db)
+	adminService := service.NewAdminService(adminRepo)
+	adminController := controller.NewAdminController(adminService)
+
+	// user login
+	userRepo := repository.NewUserRepository(db)
+	tokenUseCase := helper.NewTokenUseCase()
+	userService := service.NewUserService(userRepo, tokenUseCase)
+	userController := controller.NewUserController(userService)
+
+	// event
+	eventRepositoryImpl := repository.NewEventRepository(db)
+	eventServieImpl := service.NewEventService(eventRepositoryImpl)
+	eventControllerImpl := controller.NewEventController(eventServieImpl)
+	// history
+	historyRepo := repository.NewHistoryRepositoryImpl(app.DB)
+	historyService := service.NewHistoryServiceImpl(historyRepo)
+	historyController := controller.NewHistoryControllerImpl(historyService)
 
 	// Seed database if the seed flag is provided
 	seedFlag := flag.Bool("seed", false, "seed database")
@@ -36,33 +66,37 @@ func main() {
 		return
 	}
 
-	// Initialize Echo instance
 	e := echo.New()
+	e.Validator = &CustomValidator{validator: validator.New()}
+	e.HTTPErrorHandler = helper.BindAndValidate
 
-	// Middleware
-	e.Use(middleware.Logger())
-	e.Use(middleware.Recover())
-	e.Use(common.LoggingMiddleware)
-
-	// Initialize logger
-	common.NewLogger()
-
-	// Initialize repository, service, and controller
-	userRepo := repository.NewUserRepository(db)
-	userService := service.NewUserService(userRepo)
-	userController := controller.NewUserController(userService)
-
-	adminRepo := repository.NewAdminRepository(db)
-	adminService := service.NewAdminService(adminRepo)
-	adminController := controller.NewAdminController(adminService)
+	// e.Use(common.LoggingMiddleware)
+	e.Validator = &CustomValidator{validator: validator.New()}
+	e.HTTPErrorHandler = helper.BindValidate
 
 	// Routes
 	e.GET("/", func(c echo.Context) error {
 		return c.String(http.StatusOK, "Hello, World!")
 	})
-	e.POST("/user/register", userController.Register)
+	// user register
+	e.POST("/user/register", userRegisterController.Register)
 	e.POST("/admin/register", adminController.Register)
 
-	// Start server
-	common.Logger.LogInfo().Msg(e.Start(":8080").Error())
+	// user login
+	e.POST("/login-user", userController.LoginUser)
+	e.POST("/login-admin", userController.LoginAdmin)
+
+	// event
+	e.POST("/event/createEvent", eventControllerImpl.CreateEvent)
+	e.GET("/event/:id", eventControllerImpl.GetEvent)
+	e.GET("/event/list", eventControllerImpl.GetListEvent)
+	e.PUT("/event/:id", eventControllerImpl.UpdateEvent)
+	e.DELETE("/event/:id", eventControllerImpl.DeleteEvent)
+
+	// history
+	e.GET("/history", historyController.GetHistory)
+	e.GET("/history/:id", historyController.GetHistoryByID)
+	e.GET("/history/status/:status", historyController.GetHistoryByStatus)
+
+	e.Logger.Fatal(e.Start(":8080"))
 }

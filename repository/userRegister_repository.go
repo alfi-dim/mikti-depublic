@@ -6,15 +6,15 @@ import (
 	"gorm.io/gorm"
 )
 
-type UserRepository struct {
+type UserRegisterRepository struct {
 	DB *gorm.DB
 }
 
-func NewUserRepository(db *gorm.DB) *UserRepository {
-	return &UserRepository{DB: db}
+func NewUserRegisterRepository(db *gorm.DB) *UserRegisterRepository {
+	return &UserRegisterRepository{DB: db}
 }
 
-func (repo *UserRepository) Save(user domain.User) error {
+func (repo *UserRegisterRepository) Save(user domain.User) error {
 	result := repo.DB.Create(&user)
 	return result.Error
 }
