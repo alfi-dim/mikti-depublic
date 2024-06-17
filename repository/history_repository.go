@@ -13,6 +13,6 @@ type HistoryRepository interface {
 	FindByStatus(status string) ([]domain.Transaction, error)
 }
 
-func NewTransactionRepository(db *gorm.DB) HistoryRepository {
+func NewHistoryRepository(db *gorm.DB) HistoryRepository {
 	return NewHistoryRepositoryImpl(db)
 }
