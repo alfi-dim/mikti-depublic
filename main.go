@@ -33,12 +33,12 @@ func main() {
 	db := app.GetDB()
 	// user register
 	userRegisterRepo := repository.NewUserRegisterRepository(db)
-	userRegisterService := service.NewUserRegisterService(userRegisterRepo)
+	userRegisterService := service.NewUserRegisterService(userRegisterRepo, db)
 	userRegisterController := controller.NewUserRegisterController(userRegisterService)
 	
 	// admin register
 	adminRepo := repository.NewAdminRepository(db)
-	adminService := service.NewAdminService(adminRepo)
+	adminService := service.NewAdminService(adminRepo, db)
 	adminController := controller.NewAdminController(adminService)
 
 	// user login
