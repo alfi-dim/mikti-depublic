@@ -7,6 +7,7 @@ import (
 	"mikti-depublic/controller"
 	"mikti-depublic/db/seeds"
 	"mikti-depublic/helper"
+	"mikti-depublic/middleware"
 	"mikti-depublic/repository"
 	"mikti-depublic/service"
 	"net/http"
@@ -35,7 +36,7 @@ func main() {
 	userRegisterRepo := repository.NewUserRegisterRepository(db)
 	userRegisterService := service.NewUserRegisterService(userRegisterRepo, db)
 	userRegisterController := controller.NewUserRegisterController(userRegisterService)
-	
+
 	// admin register
 	adminRepo := repository.NewAdminRepository(db)
 	adminService := service.NewAdminService(adminRepo, db)
@@ -49,12 +50,16 @@ func main() {
 
 	// event
 	eventRepositoryImpl := repository.NewEventRepository(db)
-	eventServieImpl := service.NewEventService(eventRepositoryImpl)
-	eventControllerImpl := controller.NewEventController(eventServieImpl)
+	eventServiceImpl := service.NewEventService(eventRepositoryImpl)
+	eventControllerImpl := controller.NewEventController(eventServiceImpl)
 	// history
 	historyRepo := repository.NewHistoryRepositoryImpl(app.DB)
 	historyService := service.NewHistoryServiceImpl(historyRepo)
 	historyController := controller.NewHistoryControllerImpl(historyService)
+	// transaction
+	transactionRepo := repository.NewTransactionRepository(app.DB)
+	transactionService := service.NewTransactionServiceImpl(transactionRepo, eventRepositoryImpl)
+	transactionController := controller.NewTransactionControllerImpl(transactionService)
 
 	// Seed database if the seed flag is provided
 	seedFlag := flag.Bool("seed", false, "seed database")
@@ -97,6 +102,12 @@ func main() {
 	e.GET("/history", historyController.GetHistory)
 	e.GET("/history/:id", historyController.GetHistoryByID)
 	e.GET("/history/status/:status", historyController.GetHistoryByStatus)
+
+	// transaction
+	e.POST("/transaction", transactionController.CreateTransaction, middleware.JwtTokenValidator)
+	e.GET("/transaction/:id", transactionController.GetTransactionById, middleware.JwtTokenValidator)
+	e.GET("/transactions", transactionController.GetAllTransactions, middleware.JwtTokenValidator)
+	e.PUT("/transaction/:id", transactionController.ConfirmPayment, middleware.JwtTokenValidator)
 
 	e.Logger.Fatal(e.Start(":8080"))
 }
