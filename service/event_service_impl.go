@@ -1,13 +1,11 @@
 package service
 
 import (
-	"math/rand"
 	"mikti-depublic/helper"
 	"mikti-depublic/model/domain"
 	"mikti-depublic/model/entity"
 	"mikti-depublic/model/web"
 	"mikti-depublic/repository"
-	"time"
 )
 
 type EventServiceImpl struct {
@@ -21,7 +19,7 @@ func NewEventService(repository repository.EventRepository) *EventServiceImpl {
 }
 
 func (service *EventServiceImpl) CreateEvent(request web.EventServiceReq) (map[string]interface{}, error) {
-	eventID := generateRandomString(5)
+	eventID := helper.GenerateId(5, "event")
 	eventReq := domain.Event{
 		ID:          eventID,
 		AdminId:     request.AdminId,
@@ -106,16 +104,4 @@ func (service *EventServiceImpl) DeleteEvent(Id string) (entity.EventEntity, err
 		return entity.EventEntity{}, errDelete
 	}
 	return entity.ToEventEntity(deleteEvent.ID, deleteEvent.AdminId, deleteEvent.Name, deleteEvent.Address, deleteEvent.Date, deleteEvent.Price, deleteEvent.Tickets, deleteEvent.TicketsSold), nil
-}
-
-// Fungsi generate random ID untuk event
-func generateRandomString(n int) string {
-	seed := time.Now().UnixNano()
-	r := rand.New(rand.NewSource(seed))
-	charset := []rune("1234567890")
-	letters := make([]rune, n)
-	for i := range letters {
-		letters[i] = charset[r.Intn(len(charset))]
-	}
-	return "event-" + string(letters)
 }
