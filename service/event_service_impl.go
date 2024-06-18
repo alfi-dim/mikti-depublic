@@ -6,6 +6,8 @@ import (
 	"mikti-depublic/model/entity"
 	"mikti-depublic/model/web"
 	"mikti-depublic/repository"
+
+	"github.com/labstack/echo/v4"
 )
 
 type EventServiceImpl struct {
@@ -18,11 +20,15 @@ func NewEventService(repository repository.EventRepository) *EventServiceImpl {
 	}
 }
 
-func (service *EventServiceImpl) CreateEvent(request web.EventServiceReq) (map[string]interface{}, error) {
+func (service *EventServiceImpl) CreateEvent(request web.EventServiceReq, c echo.Context) (map[string]interface{}, error) {
 	eventID := helper.GenerateId(5, "event")
+
+	// Membuat adminId secara otomatis dengan data yang ada di JWT
+	claims := c.Get("claims").(helper.JwtCustomClaims)
+	adminID := claims.ID
 	eventReq := domain.Event{
 		ID:          eventID,
-		AdminId:     request.AdminId,
+		AdminId:     adminID,
 		Name:        request.Name,
 		Address:     request.Address,
 		Date:        request.Date,
@@ -34,7 +40,7 @@ func (service *EventServiceImpl) CreateEvent(request web.EventServiceReq) (map[s
 	if errSaveEvent != nil {
 		return nil, errSaveEvent
 	}
-	return helper.ResponseJson{"id": saveEvent.ID, "name": saveEvent.Name, "address": saveEvent.Address, "date": saveEvent.Date, "price": saveEvent.Price, "tickets": saveEvent.Tickets, "ticket_sold": saveEvent.TicketsSold}, nil
+	return helper.ResponseJson{"id": saveEvent.ID, "administrators_id": saveEvent.AdminId, "name": saveEvent.Name, "address": saveEvent.Address, "date": saveEvent.Date, "price": saveEvent.Price, "tickets": saveEvent.Tickets, "ticket_sold": saveEvent.TicketsSold}, nil
 }
 
 func (service *EventServiceImpl) GetEvent(eventId string) (entity.EventEntity, error) {
