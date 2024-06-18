@@ -30,7 +30,7 @@ func (controller *EventControllerImpl) CreateEvent(c echo.Context) error {
 		return err
 	}
 
-	saveEvent, errCreateEvent := controller.service.CreateEvent(*event)
+	saveEvent, errCreateEvent := controller.service.CreateEvent(*event, c)
 
 	if errCreateEvent != nil {
 		return c.JSON(http.StatusBadRequest, model.ResponseToClient(http.StatusBadRequest, errCreateEvent.Error(), nil))

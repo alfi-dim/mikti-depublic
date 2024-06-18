@@ -92,11 +92,11 @@ func main() {
 	e.POST("/login-admin", userController.LoginAdmin)
 
 	// event
-	e.POST("/event/createEvent", eventControllerImpl.CreateEvent)
+	e.POST("/event/createEvent", eventControllerImpl.CreateEvent, middleware.JwtTokenValidator)
 	e.GET("/event/:id", eventControllerImpl.GetEvent)
 	e.GET("/event/list", eventControllerImpl.GetListEvent)
-	e.PUT("/event/:id", eventControllerImpl.UpdateEvent)
-	e.DELETE("/event/:id", eventControllerImpl.DeleteEvent)
+	e.PUT("/event/:id", eventControllerImpl.UpdateEvent, middleware.JwtTokenValidator)
+	e.DELETE("/event/:id", eventControllerImpl.DeleteEvent, middleware.JwtTokenValidator)
 
 	// history
 	e.GET("/history", historyController.GetHistory)

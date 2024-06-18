@@ -1,9 +1,11 @@
 package middleware
 
 import (
-	"github.com/labstack/echo/v4"
 	"mikti-depublic/helper"
 	"net/http"
+	"strings"
+
+	"github.com/labstack/echo/v4"
 )
 
 func JwtTokenValidator(next echo.HandlerFunc) echo.HandlerFunc {
@@ -33,6 +35,26 @@ func JwtTokenValidator(next echo.HandlerFunc) echo.HandlerFunc {
 
 		// Add claims to context
 		c.Set("claims", claims)
+
+		// Periksa peran admin
+		switch c.Path() {
+		case "/event/createEvent":
+			// Memeriksa admin untuk createEvent
+			id := claims.ID
+			if !strings.HasPrefix(id, "ADMIN") {
+				return c.JSON(http.StatusForbidden, map[string]string{
+					"message": "Akses ditolak, endpoint ini hanya untuk Admin!",
+				})
+			}
+		case "/event/:id":
+			// Memeriksa admin untuk update atau delete event
+			id := claims.ID
+			if !strings.HasPrefix(id, "ADMIN") {
+				return c.JSON(http.StatusForbidden, map[string]string{
+					"message": "Akses ditolak, endpoint ini hanya untuk Admin!",
+				})
+			}
+		}
 		return next(c)
 	}
 }
