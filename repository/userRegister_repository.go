@@ -14,7 +14,13 @@ func NewUserRegisterRepository(db *gorm.DB) *UserRegisterRepository {
 	return &UserRegisterRepository{DB: db}
 }
 
-func (repo *UserRegisterRepository) Save(user domain.User) error {
-	result := repo.DB.Create(&user)
-	return result.Error
+func (repo *UserRegisterRepository) Save(user domain.User) (domain.User, error) {
+	err := repo.DB.Create(&user).Error
+
+	if err != nil {
+		return domain.User{}, err
+	}
+
+	return user, nil
+	
 }

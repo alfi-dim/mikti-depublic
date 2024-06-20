@@ -72,8 +72,8 @@ func main() {
 	}
 
 	e := echo.New()
-	e.Validator = &CustomValidator{validator: validator.New()}
-	e.HTTPErrorHandler = helper.BindAndValidate
+	// e.Validator = &CustomValidator{validator: validator.New()}
+	// e.HTTPErrorHandler = helper.BindAndValidate
 
 	// e.Use(common.LoggingMiddleware)
 	e.Validator = &CustomValidator{validator: validator.New()}

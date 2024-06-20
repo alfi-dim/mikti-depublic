@@ -22,9 +22,13 @@ func BindValidate(err error, c echo.Context) {
 			case "required":
 				report.Message = fmt.Sprintf("%s Field wajib diisi", err.Field())
 				report.Code = http.StatusBadRequest
+			case "email":
+				report.Message = fmt.Sprintf("%s ini bukan email valid", err.Field())
+				report.Code = http.StatusBadRequest
 			}
 		}
 	}
 	c.Logger().Error(report.Message)
 	c.JSON(report.Code, model.ResponseToClient(report.Code, report.Message.(string), nil))
 }
+

@@ -14,7 +14,10 @@ func NewAdminRepository(db *gorm.DB) *AdminRepository {
 	return &AdminRepository{DB: db}
 }
 
-func (repo *AdminRepository) Save(admin domain.Admin) error {
-	result := repo.DB.Create(&admin)
-	return result.Error
+func (repo *AdminRepository) Save(admin domain.Admin) (domain.Admin, error) {
+	err := repo.DB.Create(&admin).Error
+	if err != nil {
+		return domain.Admin{}, err
+	}
+	return admin, nil
 }
