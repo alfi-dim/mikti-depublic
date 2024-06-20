@@ -26,6 +26,10 @@ func (controller *UserControllerImpl) LoginUser(c echo.Context) error {
 		return c.JSON(http.StatusBadRequest, model.ResponseToClient(http.StatusBadRequest, err.Error(), nil))
 	}
 
+	if err := c.Validate(user); err != nil {
+		return err
+	}
+	
 	userRes, errLogin := controller.UserService.LoginUser(user.Email, user.Password)
 	if errLogin != nil {
 		return c.JSON(http.StatusBadRequest, model.ResponseToClient(http.StatusBadRequest, errLogin.Error(), nil))

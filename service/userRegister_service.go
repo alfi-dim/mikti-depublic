@@ -3,6 +3,7 @@ package service
 import (
 	"mikti-depublic/helper"
 	"mikti-depublic/model/domain"
+	"mikti-depublic/model/web"
 	"mikti-depublic/repository"
 
 	"golang.org/x/crypto/bcrypt"
@@ -18,22 +19,30 @@ func NewUserRegisterService(repo *repository.UserRegisterRepository, db *gorm.DB
 	return &UserRegisterService{Repo: repo, DB: db}
 }
 
-func (s *UserRegisterService) Register(user domain.User) error {
+func (s *UserRegisterService) Register(request web.UserRegisterRequest) (domain.User, error) {
+	user := domain.User{}
 	userID, err := helper.GenerateID(s.DB, user.TableName(), "USER")
 	if err != nil {
-		return err
+		return domain.User{}, err
 	}
 	user.UserID = userID
 
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(user.Password), bcrypt.DefaultCost)
 	if err != nil {
-		return err
+		return domain.User{}, err
 	}
-	user.Password = string(hashedPassword)
+	userReq := domain.User{
+		UserID: userID,
+		Name: request.Name,
+		Username: request.Username,
+		Email: request.Email,
+		Password: string(hashedPassword),
+		Phonenumber: request.PhoneNumber,
+	}
 
-	err = s.Repo.Save(user)
+	newUser, err := s.Repo.Save(userReq)
 	if err != nil {
-		return err
+		return domain.User{}, err
 	}
-	return nil
+	return newUser, nil
 }

@@ -3,6 +3,7 @@ package service
 import (
 	"mikti-depublic/helper"
 	"mikti-depublic/model/domain"
+	"mikti-depublic/model/web"
 	"mikti-depublic/repository"
 
 	"golang.org/x/crypto/bcrypt"
@@ -18,22 +19,28 @@ func NewAdminService(repo *repository.AdminRepository, db *gorm.DB) *AdminServic
 	return &AdminService{Repo: repo, DB: db}
 }
 
-func (s *AdminService) Register(admin domain.Admin) error {
+func (s *AdminService) Register(request web.AdminRegisterRequest) (domain.Admin, error) {
+	admin := domain.Admin{}
 	adminID, err := helper.GenerateID(s.DB, admin.TableName(), "ADMIN")
 	if err != nil {
-		return err
+		return domain.Admin{}, nil
 	}
-	admin.ID = adminID
 
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(admin.Password), bcrypt.DefaultCost)
 	if err != nil {
-		return err
+		return domain.Admin{}, nil
 	}
-	admin.Password = string(hashedPassword)
+	adminReq := domain.Admin {
+		ID: adminID,
+		Name: request.Name,
+		Username: request.Username,
+		Email: request.Email,
+		Password: string(hashedPassword),
+	}
 
-	err = s.Repo.Save(admin)
+	newAdmin, err := s.Repo.Save(adminReq)
 	if err != nil {
-		return err
+		return domain.Admin{}, err
 	}
-	return nil
+	return newAdmin, nil
 }

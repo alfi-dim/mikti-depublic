@@ -1,7 +1,8 @@
 package controller
 
 import (
-	"mikti-depublic/model/domain"
+	"mikti-depublic/model"
+	"mikti-depublic/model/web"
 	"mikti-depublic/service"
 	"net/http"
 
@@ -17,15 +18,20 @@ func NewUserRegisterController(service *service.UserRegisterService) *UserRegist
 }
 
 func (c *UserRegisterController) Register(ctx echo.Context) error {
-	var user domain.User
+	// var user domain.User
+	user := new(web.UserRegisterRequest)
 	if err := ctx.Bind(&user); err != nil {
-		return ctx.JSON(http.StatusBadRequest, map[string]string{"error": err.Error()})
+		return ctx.JSON(http.StatusBadRequest, model.ResponseToClient(http.StatusBadRequest, err.Error(), nil))
 	}
 
-	err := c.UserService.Register(user)
+	if err := ctx.Validate(user); err != nil {
+		return err
+	}
+
+	newUser, err := c.UserService.Register(*user)
 	if err != nil {
 		return ctx.JSON(http.StatusInternalServerError, map[string]string{"error": err.Error()})
 	}
 
-	return ctx.JSON(http.StatusOK, map[string]string{"Message": "You have successfully registered as User, now you can log in."})
+	return ctx.JSON(http.StatusOK, model.ResponseToClient(http.StatusOK, "You have successfully registered as User", newUser))
 }

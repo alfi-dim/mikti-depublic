@@ -9,7 +9,6 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
-
 func BindAndValidate(err error, c echo.Context) {
 	report, ok := err.(*echo.HTTPError)
 	if !ok {
@@ -18,7 +17,7 @@ func BindAndValidate(err error, c echo.Context) {
 
 	if castedObject, ok := err.(validator.ValidationErrors); ok {
 		for _, err := range castedObject {
-			switch err.Tag(){
+			switch err.Tag() {
 			case "required":
 				report.Message = fmt.Sprintf("%s field ini wajib diisi", err.Field())
 				report.Code = http.StatusBadRequest
