@@ -28,10 +28,9 @@ func (service *UserServiceImpl) LoginUser(email string, password string) (map[st
 		return nil, errors.New("email tidak ditemukan")
 	}
 
-	// errPass := bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(password))
 	errPass := bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(password))
 	if errPass != nil {
-		return nil, errors.New("password salah om")
+		return nil, errors.New("password anda salah")
 	}
 
 	expiredTime := time.Now().Local().Add(1 * time.Hour)
@@ -63,7 +62,7 @@ func (service *UserServiceImpl) LoginAdmin(email string, password string) (map[s
 
 	err = bcrypt.CompareHashAndPassword([]byte(admin.Password), []byte(password))
 	if err != nil {
-		return nil, errors.New("password salah om")
+		return nil, errors.New("password anda salah")
 	}
 
 	expiredTime := time.Now().Local().Add(1 * time.Hour)

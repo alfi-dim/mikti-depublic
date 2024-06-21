@@ -23,12 +23,12 @@ func (s *AdminService) Register(request web.AdminRegisterRequest) (domain.Admin,
 	admin := domain.Admin{}
 	adminID, err := helper.GenerateID(s.DB, admin.TableName(), "ADMIN")
 	if err != nil {
-		return domain.Admin{}, nil
+		return domain.Admin{}, err
 	}
 
-	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(admin.Password), bcrypt.DefaultCost)
+	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(request.Password), bcrypt.DefaultCost)
 	if err != nil {
-		return domain.Admin{}, nil
+		return domain.Admin{}, err
 	}
 	adminReq := domain.Admin {
 		ID: adminID,

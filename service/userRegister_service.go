@@ -27,7 +27,7 @@ func (s *UserRegisterService) Register(request web.UserRegisterRequest) (domain.
 	}
 	user.UserID = userID
 
-	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(user.Password), bcrypt.DefaultCost)
+	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(request.Password), bcrypt.DefaultCost)
 	if err != nil {
 		return domain.User{}, err
 	}

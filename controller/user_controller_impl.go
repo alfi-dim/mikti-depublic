@@ -29,7 +29,7 @@ func (controller *UserControllerImpl) LoginUser(c echo.Context) error {
 	if err := c.Validate(user); err != nil {
 		return err
 	}
-	
+
 	userRes, errLogin := controller.UserService.LoginUser(user.Email, user.Password)
 	if errLogin != nil {
 		return c.JSON(http.StatusBadRequest, model.ResponseToClient(http.StatusBadRequest, errLogin.Error(), nil))
@@ -43,6 +43,10 @@ func (controller *UserControllerImpl) LoginAdmin(c echo.Context) error {
 
 	if err := c.Bind(&admin); err != nil {
 		return c.JSON(http.StatusBadRequest, model.ResponseToClient(http.StatusBadRequest, err.Error(), nil))
+	}
+
+	if err := c.Validate(admin); err != nil {
+		return err
 	}
 
 	adminRes, errLogin := controller.UserService.LoginAdmin(admin.Email, admin.Password)
