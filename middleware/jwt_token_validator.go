@@ -54,6 +54,31 @@ func JwtTokenValidator(next echo.HandlerFunc) echo.HandlerFunc {
 					"message": "Akses ditolak, endpoint ini hanya untuk Admin!",
 				})
 			}
+		case "/history":
+			// Memeriksa admin untuk semua history
+			id := claims.ID
+			if !strings.HasPrefix(id, "ADMIN") {
+				return c.JSON(http.StatusForbidden, map[string]string{
+					"message": "Akses ditolak, endpoint ini hanya untuk Admin!",
+				})
+			}
+		case "/history/:id":
+			// Memeriksa admin untuk melihat history sesuai ID
+			id := claims.ID
+			requestedID := c.Param("id")
+			if !strings.HasPrefix(id, "ADMIN") && id != requestedID {
+				return c.JSON(http.StatusForbidden, map[string]string{
+					"message": "Akses ditolak, Anda hanya bisa melihat history Anda sendiri!",
+				})
+			}
+		case "/history/status/:status":
+			// Memeriksa admin untuk melihat history sesuai status
+			id := claims.ID
+			if !strings.HasPrefix(id, "ADMIN") {
+				return c.JSON(http.StatusForbidden, map[string]string{
+					"message": "Akses ditolak, endpoint ini hanya untuk Admin!",
+				})
+			}
 		}
 		return next(c)
 	}
