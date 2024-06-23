@@ -99,9 +99,9 @@ func main() {
 	e.DELETE("/event/:id", eventControllerImpl.DeleteEvent, middleware.JwtTokenValidator)
 
 	// history
-	e.GET("/history", historyController.GetHistory)
-	e.GET("/history/:id", historyController.GetHistoryByID)
-	e.GET("/history/status/:status", historyController.GetHistoryByStatus)
+	e.GET("/history", historyController.GetHistory, middleware.JwtTokenValidator)
+	e.GET("/history/:id", historyController.GetHistoryByID, middleware.JwtTokenValidator)
+	e.GET("/history/status/:status", historyController.GetHistoryByStatus, middleware.JwtTokenValidator)
 
 	// transaction
 	e.POST("/transaction", transactionController.CreateTransaction, middleware.JwtTokenValidator)
